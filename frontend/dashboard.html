@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Dashboard - Hackathon 2026</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/dashboard_new.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-page">
+    <div id="toast-container"></div>
+
+    <div class="container" style="max-width: 1400px;">
+        <nav class="dashboard-nav">
+            <div class="logo gradient-text" style="font-size: 1.6rem; letter-spacing: -0.02em;">HACKVOTE</div>
+            <div id="user-info" style="display: flex; align-items: center; gap: 20px; color: var(--text-muted);">
+                <div style="background: #f1f5f9; padding: 6px 14px; font-size: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600;">
+                    PRN: <span id="display-prn" style="color: var(--primary)"></span>
+                </div>
+                <button id="logout-btn" class="btn btn-outline" style="padding: 8px 18px; font-size: 0.85rem; border-radius: 8px;">Logout</button>
+            </div>
+        </nav>
+
+        <header style="margin-bottom: 50px; text-align: center;">
+            <h1 class="gradient-text staggered-entry" style="font-size: 3.5rem; margin-bottom: 10px; font-weight: 900;">Project Showcase</h1>
+            <p class="staggered-entry" style="color: var(--text-muted); font-size: 1.15rem; max-width: 800px; margin: 0 auto; line-height: 1.6; opacity: 0.8;">
+                Welcome to the Hackathon 2026 gallery. Browse 70 innovative solutions and support your favorites.
+            </p>
+            
+            <div class="progress-container-card staggered-entry" style="margin-top: 40px; animation-delay: 0.1s;">
+                <h3 style="margin-bottom: 5px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.7;">Voting Progress</h3>
+                <div class="voting-progress-bar">
+                    <div id="progress-indicator" class="progress-fill"></div>
+                </div>
+                <div class="progress-stats">
+                    <p id="progress-text" style="color: var(--text-muted); font-size: 0.95rem; font-weight: 600;">0 / 70 projects voted</p>
+                    <div class="progress-percent" id="progress-percent-text">0%</div>
+                </div>
+            </div>
+            
+            <div class="staggered-entry" style="display: flex; justify-content: center; animation-delay: 0.2s;">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-projects" placeholder="Search by project name or team...">
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div id="projects-grid" class="projects-grid">
+                <!-- Project cards will be injected here by dashboard.js -->
+                <div class="loader-container">
+                    <div class="complex-loader"></div>
+                    <p style="color: var(--text-muted); font-weight: 600;">Discovering innovative projects...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Live Analytics</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="staggered-entry" style="padding-bottom: 50px;">
+    <div id="toast-container"></div>
+
+    <div class="container" style="max-width: 1400px;">
+        <nav style="margin: 20px 0 40px; border-radius: 12px;">
+            <div class="logo gradient-text" style="font-size: 1.4rem">ADMIN CONSOLE</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button id="logout-btn" class="btn btn-outline" style="padding: 10px 25px; border-radius: 8px;">Logout</button>
+            </div>
+        </nav>
+
+        <header style="margin-bottom: 40px;">
+            <h1 class="gradient-text" style="font-size: 3rem; margin-bottom: 15px; font-weight: 900;">Intelligence Dashboard</h1>
+            <p style="color: var(--text-muted); font-size: 1.15rem; max-width: 800px; line-height: 1.6;">Monitoring real-time voting engagement across all hackathon participants. Data refreshes automatically.</p>
+        </header>
+
+        <section class="dashboard-stats">
+            <div class="card stat-card">
+                <h4 id="total-projects">0</h4>
+                <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Total Projects</p>
+            </div>
+            <div class="card stat-card">
+                <h4 id="total-votes">0</h4>
+                <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Total Votes Cast</p>
+            </div>
+            <div class="card stat-card">
+              <h4 id="best-votes" style="color: var(--success);">0</h4>
+              <p style="color: var(--success); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Gold Votes</p>
+            </div>
+            <div class="card stat-card" onclick="window.scrollTo({top: document.getElementById('leaderboard-section').offsetTop, behavior: 'smooth'})" style="cursor: pointer; border-color: var(--primary);">
+                <i class="fas fa-medal" style="color: var(--primary); margin-bottom: 12px;"></i>
+                <p id="top-project-title" style="font-weight: 900; font-size: 1rem; color: var(--primary); margin-bottom: 5px;">#1 Loading...</p>
+                <p style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Trending Leader</p>
+            </div>
+        </section>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 30px; margin-bottom: 50px;">
+            <section class="card" style="padding: 30px;">
+                <h3 style="margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-size: 1.25rem;">
+                    <i class="fas fa-chart-pie" style="color: var(--primary);"></i> Voting Mix
+                </h3>
+                <div style="height: 350px;">
+                    <canvas id="votingChart"></canvas>
+                </div>
+            </section>
+
+            <section class="card" id="leaderboard-section" style="padding: 30px;">
+                <h3 style="margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-size: 1.25rem;">
+                    <i class="fas fa-trophy" style="color: #eab308;"></i> Elite Top 5
+                </h3>
+                <div id="leaderboard-list">
+                    <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                        <i class="fas fa-spinner fa-spin"></i> Processing results...
+                    </div>
+                </div>
+                <div style="margin-top: 25px; text-align: center;">
+                    <button id="view-full-leaderboard" class="btn btn-outline" style="font-size: 0.9rem; width: 100%;">View Consolidated Standings</button>
+                </div>
+            </section>
+        </div>
+
+        <section class="card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: #f8fafc;">
+                <h2 style="font-size: 1.5rem; margin: 0;">Project Management</h2>
+                <button id="add-project-btn" class="btn btn-primary" style="padding: 10px 25px; font-size: 0.9rem;">+ Add Entry</button>
+            </div>
+            
+            <div style="overflow-x: auto; padding: 20px 40px 40px;">
+                <table style="border: none; margin-top: 0;">
+                    <thead style="background: white;">
+                        <tr>
+                            <th style="padding: 15px 0;">PROJECT & TEAM</th>
+                            <th>BEST</th>
+                            <th>GOOD</th>
+                            <th>MOD.</th>
+                            <th>TOTAL</th>
+                            <th style="text-align: right;">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-projects-table">
+                        <!-- Table rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for Add/Edit Project -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content card">
+            <h2 id="modal-title" class="gradient-text" style="font-size: 2rem; margin-bottom: 30px; font-weight: 900;">Modify Entry</h2>
+            <form id="project-form">
+                <input type="hidden" id="project-id">
+                <div class="form-group">
+                    <label>PROJECT TITLE</label>
+                    <input type="text" id="project-title" placeholder="Enter project name" required>
+                </div>
+                <div class="form-group">
+                    <label>TEAM DESIGNATION</label>
+                    <input type="text" id="project-team" placeholder="Team ID or name" required>
+                </div>
+                <div class="form-group">
+                    <label>DESCRIPTION</label>
+                    <textarea id="project-description" 
+                              style="width: 100%; padding: 15px; border-radius: 12px; color: var(--text-main); background: #f8fafc; border: 1px solid var(--border-color); height: 120px; outline: none; font-family: 'Outfit', sans-serif;"></textarea>
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 40px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 2;">Save Project</button>
+                    <button type="button" id="close-modal" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

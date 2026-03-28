@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Hackathon Voting System</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="staggered-entry">
+    <div class="container">
+        <nav style="margin: 20px 0; border-radius: 12px; position: relative; top: 0;">
+            <div class="logo gradient-text" style="font-size: 1.4rem; font-weight: 900;">HACKVOTE</div>
+            <div class="nav-links" style="display: flex; gap: 15px; align-items: center;">
+                <a href="login.html" class="btn btn-outline" style="text-decoration: none; padding: 10px 20px; font-size: 0.9rem;">Student Portal</a>
+                <a href="admin-login.html" class="btn btn-primary" style="text-decoration: none; padding: 10px 20px; font-size: 0.9rem;">Admin Login</a>
+            </div>
+        </nav>
+
+        <section class="hero-section">
+            <div style="background: #eef2ff; padding: 6px 16px; border-radius: 100px; display: inline-block; margin-bottom: 25px; border: 1px solid #e0e7ff; font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.05em;">
+                OFFICIAL VOTING PORTAL 2026
+            </div>
+            <h1 class="hero-h1 gradient-text">Voice of the Next Generation.</h1>
+            <p class="hero-p">
+                Select and support the most innovative solutions from this year's hackathon. Your vote shapes the future of technology on campus.
+            </p>
+            
+            <div class="portal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; width: 100%; max-width: 900px; margin: 0 auto;">
+                <div class="card" onclick="window.location.href='login.html'" style="cursor: pointer; text-align: left; padding: 35px; transition: 0.3s;">
+                    <div style="background: #f1f5f9; width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; color: var(--primary); font-size: 1.4rem;">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                    <h2 style="font-size: 1.5rem; margin-bottom: 12px;">Student Portal</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">Login with PRN to explore project entries and cast your support.</p>
+                    <div style="margin-top: 25px; font-weight: 800; color: var(--primary); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                        ENTER PORTAL <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                
+                <div class="card" onclick="window.location.href='admin-login.html'" style="cursor: pointer; text-align: left; padding: 35px; transition: 0.3s;">
+                    <div style="background: #f1f5f9; width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; color: var(--secondary); font-size: 1.4rem;">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h2 style="font-size: 1.5rem; margin-bottom: 12px;">Admin Access</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">Secure coordinator login for live analytics and entry management.</p>
+                    <div style="margin-top: 25px; font-weight: 800; color: var(--secondary); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                        ADMIN LOGIN <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
