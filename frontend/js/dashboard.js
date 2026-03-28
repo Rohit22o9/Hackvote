@@ -1,190 +1,107 @@
-// Student dashboard logic (dashboard.js)
-const projectsGrid = document.getElementById('projects-grid');
-const searchInput = document.getElementById('search-projects');
-const progressIndicator = document.getElementById('progress-indicator');
-const progressText = document.getElementById('progress-text');
-const displayPrn = document.getElementById('display-prn');
+// Dashboard Logic for HackVote
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjects();
+});
 
-let allProjects = [];
-let votedProjectsIds = [];
+/**
+ * Loads project teams from the backend.
+ * Currently, this is a placeholder function for API integration.
+ */
+async function loadProjects() {
+    console.log("Fetching projects...");
+}
 
-const getHost = () => {
-    return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-           ? 'http://127.0.0.1:5000' : '';
-};
+/**
+ * Prepares and sends a vote for a specific team.
+ * @param {string} team_id - The ID of the team being rated.
+ * @param {string} rating - The selected rating (Best, Good, Average, Bad).
+ */
+async function submitVote(team_id, rating) {
+    const student_name = localStorage.getItem('student_name');
 
-// Initialize dashboard
-async function init() {
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    const prn = localStorage.getItem('prn');
-
-    if (!token || role !== 'student') {
+    if (!student_name) {
+        showToast('You must be logged in to vote.', 'error');
         window.location.href = 'login.html';
         return;
     }
 
-    displayPrn.textContent = prn;
-
-    // Fetch user votes and all projects in parallel
-    try {
-        const [votesRes, projectsRes] = await Promise.all([
-            fetch(`${getHost()}/api/votes/my-votes`, { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch(`${getHost()}/api/projects`, { headers: { 'Authorization': `Bearer ${token}` } })
-        ]);
-
-        if (votesRes.ok) votedProjectsIds = await votesRes.json();
-        if (projectsRes.ok) allProjects = await projectsRes.json();
-
-        renderProjects(allProjects);
-        updateProgress();
-    } catch (err) {
-        showToast('Failed to load dashboard data. Check your connection.', 'error');
-    }
-}
-
-// Render dynamic project cards with staggered animation
-function renderProjects(projects) {
-    if (projects.length === 0) {
-        projectsGrid.innerHTML = `
-            <div class="staggered-entry" style="grid-column: 1/-1; padding: 80px; text-align: center; background: white; border: 1px solid var(--border-color); border-radius: 24px; box-shadow: var(--surface-shadow);">
-                <i class="fas fa-search" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.2;"></i>
-                <h3 style="color: var(--text-main); font-weight: 800;">No projects found</h3>
-                <p style="color: var(--text-muted);">Try different keywords or browse all teams.</p>
-            </div>`;
+    if (!rating) {
+        showToast('Please select a rating before submitting.', 'error');
         return;
     }
 
-    projectsGrid.innerHTML = projects.map((project, index) => {
-        const hasVoted = votedProjectsIds.includes(project._id);
-        const delay = (index % 12) * 0.05; // Stagger effect
+    // JSON payload to be sent to /vote
+    const payload = {
+        student_name: student_name,
+        team_id: team_id,
+        rating: rating
+    };
+
+    console.log("Submitting Vote Payload:", payload);
+    showToast(`Rating submitted for Team ${team_id}!`, 'success');
+
+    /* 
+       Later: Send POST request to /vote
+       
+       try {
+           const response = await fetch('/api/vote', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(payload)
+           });
+           
+           if (response.ok) {
+               showToast('Vote cast successfully!', 'success');
+           } else {
+               showToast('Failed to submit vote.', 'error');
+           }
+       } catch (err) {
+           console.error('Vote Error:', err);
+           showToast('Connection error.', 'error');
+       }
+    */
+}
+
+/**
+ * Helper to create a project card (to be used when dynamic rendering is implemented)
+ */
+function createProjectCard(team) {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.innerHTML = `
+        <span class="team-name">${team.team_name}</span>
+        <h3>${team.project_name}</h3>
         
-        return `
-            <div class="project-card staggered-entry ${hasVoted ? 'voted' : ''}" 
-                 id="project-${project._id}" 
-                 style="animation-delay: ${delay}s">
-                <div class="team-badge"><i class="fas fa-users" style="margin-right: 6px;"></i> ${project.teamName || 'Team Unknown'}</div>
-                <h3>${project.title}</h3>
-                <p class="project-desc">${project.description.substring(0, 140)}${project.description.length > 140 ? '...' : ''}</p>
-                
-                <div class="vote-actions" id="actions-${project._id}">
-                    <button class="vote-btn best ${hasVoted ? 'disabled' : ''}" 
-                            onclick="handleVote('${project._id}', 'best')" ${hasVoted ? 'disabled' : ''}>
-                        <i class="fas fa-award"></i>
-                        <span class="btn-label">Best</span>
-                    </button>
-                    <button class="vote-btn good ${hasVoted ? 'disabled' : ''}" 
-                            onclick="handleVote('${project._id}', 'good')" ${hasVoted ? 'disabled' : ''}>
-                        <i class="fas fa-thumbs-up"></i>
-                        <span class="btn-label">Good</span>
-                    </button>
-                    <button class="vote-btn moderate ${hasVoted ? 'disabled' : ''}" 
-                            onclick="handleVote('${project._id}', 'moderate')" ${hasVoted ? 'disabled' : ''}>
-                        <i class="fas fa-check"></i>
-                        <span class="btn-label">Moderate</span>
-                    </button>
-                </div>
-                ${hasVoted ? `
-                    <div class="voted-msg">
-                        <i class="fas fa-check-circle"></i> VOTE RECORDED
-                    </div>` : ''}
-            </div>
-        `;
-    }).join('');
+        <div class="rating-group">
+            <label class="rating-option">
+                <input type="radio" name="rating_${team.id}" value="Best"> Best
+            </label>
+            <label class="rating-option">
+                <input type="radio" name="rating_${team.id}" value="Good"> Good
+            </label>
+            <label class="rating-option">
+                <input type="radio" name="rating_${team.id}" value="Average"> Average
+            </label>
+            <label class="rating-option">
+                <input type="radio" name="rating_${team.id}" value="Bad"> Bad
+            </label>
+        </div>
+        
+        <button class="btn btn-primary btn-submit" onclick="handleCardSubmit('${team.id}')">
+            Submit Rating
+        </button>
+    `;
+    return card;
 }
 
-// Handle project voting
-async function handleVote(projectId, voteType) {
-    const token = localStorage.getItem('token');
-    
-    try {
-        const res = await fetch(`${getHost()}/api/votes`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ projectId, voteType })
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-            showToast(`Vote recorded as "${voteType.toUpperCase()}"!`, 'success');
-            
-            // UI State Update
-            votedProjectsIds.push(projectId);
-            updateVoteUI(projectId, voteType);
-            updateProgress();
-        } else {
-            showToast(data.message || 'Error submitting vote', 'error');
-        }
-    } catch (err) {
-        showToast('Connection error during voting.', 'error');
+/**
+ * Handles the submit button click specifically for dynamic cards
+ */
+function handleCardSubmit(team_id) {
+    const selectedRadio = document.querySelector(`input[name="rating_${team_id}"]:checked`);
+    if (selectedRadio) {
+        submitVote(team_id, selectedRadio.value);
+    } else {
+        showToast('Please select a rating.', 'error');
     }
 }
-
-// Update specific project UI after vote
-function updateVoteUI(projectId, voteType) {
-    const actionsDiv = document.getElementById(`actions-${projectId}`);
-    const card = document.getElementById(`project-${projectId}`);
-    
-    if (actionsDiv && card) {
-        card.classList.add('voted');
-        actionsDiv.innerHTML = `
-            <button class="vote-btn best disabled" disabled><i class="fas fa-award"></i><span class="btn-label">Best</span></button>
-            <button class="vote-btn good disabled" disabled><i class="fas fa-thumbs-up"></i><span class="btn-label">Good</span></button>
-            <button class="vote-btn moderate disabled" disabled><i class="fas fa-check"></i><span class="btn-label">Moderate</span></button>
-        `;
-        const votedMsg = document.createElement('div');
-        votedMsg.className = "voted-msg";
-        votedMsg.innerHTML = `<i class="fas fa-check-circle"></i> VOTE RECORDED`;
-        card.appendChild(votedMsg);
-    }
-}
-
-// Update voting progress bar with percentage animation
-function updateProgress() {
-    const total = 70; // Hardcoded requirement
-    const voted = votedProjectsIds.length;
-    const percent = Math.round((voted / total) * 100);
-    
-    progressIndicator.style.width = `${percent}%`;
-    progressText.innerText = `${voted} / ${total} teams supported`;
-    
-    const percentEl = document.getElementById('progress-percent-text');
-    if (percentEl) {
-        percentEl.innerText = `${percent}%`;
-    }
-}
-
-// Search filtering logic
-searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    const filtered = allProjects.filter(p => 
-        p.title.toLowerCase().includes(query) || 
-        p.teamName.toLowerCase().includes(query)
-    );
-    renderProjects(filtered);
-});
-
-// Logout handler (inherited via main but we redefine for safety)
-document.getElementById('logout-btn')?.addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = 'index.html';
-});
-
-// Helper for UI
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerText = message;
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
-}
-
-// Initialize
-init();

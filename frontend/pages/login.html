@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - HackVote</title>
+    <!-- Relative paths adjusted for pages/ directory -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .shield-icon {
+            background: rgba(99, 102, 241, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        .error-message {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 4px;
+            font-weight: 600;
+            display: none;
+            text-align: left;
+        }
+        .error-alert {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+            text-align: left;
+        }
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            padding: 14px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .form-group label {
+            text-align: left;
+        }
+    </style>
+</head>
+<body class="staggered-entry">
+    <div id="toast-container"></div>
+
+    <div class="container login-container">
+        <a href="../index.html" style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+        
+        <div class="auth-container card login-card">
+            <div class="shield-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            
+            <h2 class="gradient-text" style="font-size: 2rem; margin-bottom: 12px; font-weight: 900;">Login to Student Portal</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px; line-height: 1.5; font-size: 0.95rem;">Use your registered name and PRN number to access the hackathon voting portal.</p>
+            
+            <div id="general-error" class="error-alert">Invalid login credentials. Please try again.</div>
+
+            <form id="login-form" novalidate onsubmit="loginStudent(event)">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                    <div id="error-fullName" class="error-message">Full name is required</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="prn">PRN Number</label>
+                    <input type="password" id="prn" name="prn" placeholder="Enter your PRN number">
+                    <div id="error-prn" class="error-message">PRN Number is required</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    Login
+                </button>
+            </form>
+            
+            <div style="margin-top: 30px; text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <p style="font-size: 0.95rem; color: var(--text-muted);">
+                    New student? <a href="signup.html" style="color: var(--primary); text-decoration: none; font-weight: 700;">Create an account</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>

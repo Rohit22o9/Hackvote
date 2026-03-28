@@ -11,9 +11,16 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../frontend')));
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
 
-// Routes
+// Clean URL Routing for Frontend Pages
+app.get('/', (req, res) => res.sendFile(path.join(frontendPath, 'index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(frontendPath, 'pages/login.html')));
+app.get('/signup', (req, res) => res.sendFile(path.join(frontendPath, 'pages/signup.html')));
+app.get('/dashboard', (req, res) => res.sendFile(path.join(frontendPath, 'pages/dashboard.html')));
+
+// API Routes
 const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const voteRoutes = require('./routes/voteRoutes');

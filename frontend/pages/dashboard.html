@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - HackVote</title>
+    <!-- Relative paths adjusted for pages/ directory -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dashboard-container {
+            padding: 40px 5%;
+        }
+        .student-header-card {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--surface-shadow);
+        }
+        .student-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+        }
+        .student-info h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .student-meta {
+            color: var(--text-muted);
+            display: flex;
+            gap: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            font-weight: 900;
+        }
+        #projectsContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        /* Project Card Design (Reserved for dynamic loading) */
+        .project-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--surface-shadow);
+            transition: all 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--hover-shadow);
+        }
+        .project-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+        .team-name {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .rating-group {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .rating-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .rating-option:hover {
+            background: rgba(99, 102, 241, 0.05);
+            border-color: var(--primary);
+        }
+        .rating-option input {
+            cursor: pointer;
+        }
+        .btn-submit {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .logout-btn {
+            background: #ffe4e6;
+            color: #e11d48;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-left: auto;
+        }
+        .logout-btn:hover {
+            background: #fecdd3;
+        }
+    </style>
+</head>
+<body class="staggered-entry">
+    <div id="toast-container"></div>
+
+    <!-- Navigation -->
+    <nav style="position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="logo gradient-text" style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.01em;">HACKVOTE</div>
+        <button id="logoutBtn" class="logout-btn" onclick="logoutStudent()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </nav>
+
+    <div class="container dashboard-container">
+        <!-- Student Info Header -->
+        <header class="student-header-card">
+            <div class="student-avatar">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="student-info">
+                <h1 id="welcomeMessage">Welcome, Student</h1>
+                <div class="student-meta">
+                    <span><i class="fas fa-university"></i> <span id="displayBranch">Branch: N/A</span></span>
+                    <span><i class="fas fa-calendar-alt"></i> <span id="displayYear">Year: N/A</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Projects Section -->
+        <section>
+            <h2 class="section-title gradient-text">Hackathon Projects</h2>
+            <div id="projectsContainer">
+                <!-- Projects will be dynamically loaded here by loadProjects() -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+    <script src="../js/dashboard.js"></script>
+    <script>
+        // Check authentication on load
+        window.addEventListener('load', () => {
+            const name = localStorage.getItem('student_name');
+            const branch = localStorage.getItem('student_branch') || 'N/A';
+            const year = localStorage.getItem('student_year') || 'N/A';
+            
+            if (!name) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Display student info as per requirements
+            document.getElementById('welcomeMessage').innerText = `Welcome, ${name}`;
+            document.getElementById('displayBranch').innerText = `Branch: ${branch}`;
+            document.getElementById('displayYear').innerText = `Year: ${year}`;
+        });
+
+        function logoutStudent() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
