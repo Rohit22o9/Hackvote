@@ -161,16 +161,19 @@
         function renderLeaderboard(projects) {
             const list = document.getElementById('top-5-list');
             const top5 = [...projects].sort((a, b) => b.totalVotes - a.totalVotes).slice(0, 5);
-            list.innerHTML = top5.map((p, i) => `
-                <div class="leader-item">
-                    <div class="rank">#${i+1}</div>
-                    <div class="leader-info">
-                        <h4>${p.title}</h4>
-                        <span>${p.teamName}</span>
+            list.innerHTML = top5.map((p, i) => {
+                const rankClass = i < 3 ? `rank-${i+1}` : '';
+                return `
+                    <div class="leader-item">
+                        <div class="rank ${rankClass}">#${i+1}</div>
+                        <div class="leader-info">
+                            <h4>${p.title}</h4>
+                            <span>${p.teamName}</span>
+                        </div>
+                        <div class="best-count">${p.totalVotes} Votes</div>
                     </div>
-                    <div class="best-count">${p.totalVotes} Votes</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function renderMixedChart(mix) {
