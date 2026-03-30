@@ -1,363 +1,223 @@
-// Dashboard Logic for HackVote
-const API_BASE_URL = "http://127.0.0.1:8000";
+// 🗳️ HACKVOTE DASHBOARD LOGIC (Google Apps Script Version)
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyfL-ANFGJGF7O8ZpFrDSoa_Wmj6Kyy39DzbSEv1tQvx_BCXCj61MwgWezmCFWAFLva9Q/exec"; // Update this with your deployed URL
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 6. Page Initialization
-    // Verify the student is logged in by checking localStorage student_name
-    const studentName = localStorage.getItem("student_name");
-    if (!studentName) {
-        // If not logged in redirect to login page
+    const studentPRN = localStorage.getItem("student_prn");
+    if (!studentPRN) {
         window.location.href = "login.html";
         return;
     }
     
-    // Display student name (optional UI update)
     const displayPRN = document.getElementById('display-prn');
-    if (displayPRN) displayPRN.innerText = studentName;
-
-    // Call loadTeams()
-    loadTeams();
+    if (displayPRN) displayPRN.innerText = localStorage.getItem("student_name") || studentPRN;
     
-    // Check for existing votes in localStorage to persist UI state (optional but good)
-    renderSavedVotes();
+    // Display student info (Targeting direct IDs from dashboard.html)
+    const branchEl = document.getElementById('displayBranch');
+    const yearEl = document.getElementById('displayYear');
+    if(branchEl) branchEl.innerText = `Branch: ${localStorage.getItem("student_branch") || 'N/A'}`;
+    if(yearEl) yearEl.innerText = `Year: ${localStorage.getItem("student_year") || 'N/A'}`;
+
+    // Search bar functionality
+    const searchInput = document.getElementById('search-projects');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.project-card').forEach(card => {
+                const text = card.innerText.toLowerCase();
+                card.style.display = text.includes(term) ? "" : "none";
+            });
+        });
+    }
+
+    loadTeams();
+    updateVotingProgress();
 });
 
-/**
- * 5. JavaScript Structure - loadTeams()
- * Fetches /teams, loops through the teams, generates cards dynamically, inserts them into the projectsContainer
- */
+// 📋 LOAD TEAMS FROM GOOGLE SHEETS
 async function loadTeams() {
     const container = document.getElementById("projectsContainer");
     if (!container) return;
 
     try {
-        // Show loader first (already in HTML, but good to handle)
-        container.innerHTML = `
-            <div class="loader-container">
-                <div class="complex-loader"></div>
-                <p style="color: var(--text-muted); font-weight: 600;">Loading amazing projects...</p>
-            </div>
-        `;
+        container.innerHTML = `<div class="loader-container" style="grid-column: 1/-1; text-align: center; padding: 50px;"><div class="complex-loader" style="margin: 0 auto;"></div><p style="margin-top: 15px; color: var(--text-muted);">Loading projects...</p></div>`;
 
-        // 1. Load Teams on Dashboard
-        const response = await fetch(`${API_BASE_URL}/teams`);
+        const response = await fetch(`${GAS_URL}?action=getProjects`);
         const data = await response.json();
 
         if (data.status === "success") {
-            const teams = data.teams;
-            container.innerHTML = ""; // Clear loader
+            container.innerHTML = ""; 
+            const projects = data.projects;
 
-            if (teams.length === 0) {
+            if (projects.length === 0) {
                 container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-muted);">No projects found.</p>`;
                 return;
             }
 
-            // Loop through the teams and generate cards
-            teams.forEach(team => {
-                const card = createProjectCard(team);
+            projects.forEach(project => {
+                // Handle different header naming (teamname vs teamName)
+                project.teamName = project.teamName || project.teamname || "Unknown Team";
+                project.title = project.title || "Untitled Project";
+                
+                const card = createProjectCard(project);
                 container.appendChild(card);
             });
             
-            // Update progress text
-            updateProgress(teams.length);
+            updateProgress(projects.length);
         } else {
-            showToast("Failed to load teams. Please try again.", "error");
+            showToast("Failed to load projects.", "error");
         }
     } catch (error) {
-        console.error("Error loading teams:", error);
-        showToast("Error connecting to backend.", "error");
-        container.innerHTML = `<p style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--danger);">Unable to connect to the server. Is the backend running?</p>`;
+        console.error("Error loading projects:", error);
+        showToast("Error connecting to Google Sheets.", "error");
     }
 }
 
-/**
- * 2. Project Card Layout
- * Each card must display Team Name, Project Name, Rating buttons, and Submit Vote button.
- */
-function createProjectCard(team) {
+// 🗂️ CREATE PROJECT CARD
+function createProjectCard(project) {
     const card = document.createElement('div');
     card.className = 'project-card staggered-entry';
-    card.id = `card-${team.team_id}`;
+    card.id = `card-${project.id}`;
     
-    // Check if user already voted for this team in this session
-    const hasVoted = localStorage.getItem(`voted_${team.team_id}`);
+    const votedList = JSON.parse(localStorage.getItem('voted_list') || "[]");
+    const hasVoted = votedList.includes(project.id.toString());
     
     card.innerHTML = `
-        <div class="team-badge">Team: ${team.team_name}</div>
-        <h3 style="margin-bottom: 5px;">${team.project_name}</h3>
+        <div class="team-badge">Team: ${project.teamName}</div>
+        <h3 style="margin-bottom: 5px;">${project.title}</h3>
         <p style="font-size: 0.9rem; color: var(--primary); font-weight: 600; margin-bottom: 20px;">
-            Theme: ${team.theme || 'Not specified'}
+            Theme: ${project.theme || 'General'}
         </p>
         
-        <div class="vote-actions" id="actions-${team.team_id}">
-            <button class="vote-btn best" onclick="selectRating(${team.team_id}, 'Best', this)" title="Outstanding execution!">
-                <i class="fas fa-crown"></i>
-                <span class="btn-label">Best</span>
+        <div class="vote-actions" id="actions-${project.id}">
+            <button class="vote-btn best" onclick="selectRating('${project.id}', 'best', this)" title="Best">
+                <i class="fas fa-crown"></i><span class="btn-label">Best</span>
             </button>
-            <button class="vote-btn good" onclick="selectRating(${team.team_id}, 'Good', this)" title="Very well done">
-                <i class="fas fa-star"></i>
-                <span class="btn-label">Good</span>
+            <button class="vote-btn good" onclick="selectRating('${project.id}', 'good', this)" title="Good">
+                <i class="fas fa-star"></i><span class="btn-label">Good</span>
             </button>
-            <button class="vote-btn moderate" onclick="selectRating(${team.team_id}, 'Moderate', this)" title="Solid project">
-                <i class="fas fa-thumbs-up"></i>
-                <span class="btn-label">Moderate</span>
+            <button class="vote-btn moderate" onclick="selectRating('${project.id}', 'moderate', this)" title="Moderate">
+                <i class="fas fa-thumbs-up"></i><span class="btn-label">Moderate</span>
             </button>
         </div>
         
-        <div id="selection-status-${team.team_id}" style="margin-top: 15px; text-align: center; height: 1.2rem;">
+        <div id="selection-status-${project.id}" style="margin-top: 15px; text-align: center; height: 1.2rem;">
             <span class="selected-text" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); display: none;">
                 Selected: <span class="rating-label"></span>
             </span>
         </div>
 
-        <button class="btn btn-primary submit-vote-btn" 
-                onclick="handleVoteSubmit(${team.team_id})" 
-                style="margin-top: 15px; width: 100%; padding: 10px; border-radius: 10px; font-weight: 700; background: var(--primary);">
+        <button class="btn btn-primary submit-vote-btn" onclick="handleVoteSubmit('${project.id}')" style="margin-top: 15px; width: 100%; border-radius: 10px; font-weight: 700;">
             Submit Vote
         </button>
     `;
 
-    if (hasVoted) {
-        setTimeout(() => applyVotedState(team.team_id), 0);
-    }
-
+    if (hasVoted) setTimeout(() => applyVotedState(project.id), 0);
     return card;
 }
 
-// Global variable to keep track of temporary selections before submission
 const selections = {};
-
-/**
- * Handles visual selection of a rating before submission
- */
-function selectRating(teamId, rating, element) {
-    // Save selection
-    selections[teamId] = rating;
-    
-    // Clear other active buttons in this card
-    const buttons = element.parentElement.querySelectorAll('.vote-btn');
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
-    // Mark this one as active
+function selectRating(id, rating, element) {
+    selections[id] = rating;
+    element.parentElement.querySelectorAll('.vote-btn').forEach(btn => btn.classList.remove('active'));
     element.classList.add('active');
-    element.style.borderColor = 'var(--primary)';
     
-    // Show selection status
-    const statusContainer = document.getElementById(`selection-status-${teamId}`);
+    const statusContainer = document.getElementById(`selection-status-${id}`);
     if (statusContainer) {
-        const textSpan = statusContainer.querySelector('.selected-text');
-        const labelSpan = statusContainer.querySelector('.rating-label');
-        textSpan.style.display = 'inline-block';
-        labelSpan.innerText = rating;
+        statusContainer.querySelector('.selected-text').style.display = 'inline-block';
+        statusContainer.querySelector('.rating-label').innerText = rating.toUpperCase();
     }
 }
 
-/**
- * Handles the submit button click
- */
-function handleVoteSubmit(teamId) {
-    const rating = selections[teamId];
-    if (!rating) {
-        showToast("Please select a rating (Best, Good, or Moderate) first.", "error");
-        return;
-    }
-    
-    // 5. JavaScript Structure - Call submitVote()
-    submitVote(teamId, rating);
-}
-
-/**
- * 5. JavaScript Structure - submitVote(teamId, rating)
- * Sends POST request to /vote, shows success message, disables voting UI
- */
-async function submitVote(teamId, rating) {
-    const studentName = localStorage.getItem("student_name");
-    
-    // 3. Submit Vote Function payload
-    const payload = {
-        student_name: studentName,
-        team_id: parseInt(teamId),
-        rating: rating
-    };
+async function handleVoteSubmit(id) {
+    const rating = selections[id];
+    if (!rating) return showToast("Please select a rating first!", "error");
 
     try {
-        const response = await fetch(`${API_BASE_URL}/vote`, {
+        const prn = localStorage.getItem("student_prn");
+        const response = await fetch(GAS_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ 
+                action: "vote", 
+                prn: prn, 
+                projectId: id, 
+                voteType: rating 
+            })
         });
 
         const result = await response.json();
-
         if (result.status === "success") {
-            // 4. Success Feedback
-            showToast("Vote submitted successfully!", "success");
+            showToast("Vote Shared Successfully!", "success");
             
-            // Save to localStorage to persist UI state
-            localStorage.setItem(`voted_${teamId}`, rating);
+            // Local persistence update
+            const votedList = JSON.parse(localStorage.getItem('voted_list') || "[]");
+            votedList.push(id.toString());
+            localStorage.setItem('voted_list', JSON.stringify(votedList));
             
-            // Disable voting UI for this team to prevent duplicate votes
-            applyVotedState(teamId);
-            
-            // Update progress (re-calculate based on storage)
+            applyVotedState(id);
             updateVotingProgress();
         } else {
-            showToast(result.message || "Failed to submit vote.", "error");
+            showToast(result.message, "error");
         }
     } catch (error) {
-        console.error("Error submitting vote:", error);
-        showToast("Error connecting to backend.", "error");
+        showToast("Connection Error. Try again.", "error");
     }
 }
 
-/**
- * Disables the voting UI for a card after a vote is cast
- */
-function applyVotedState(teamId) {
-    const card = document.getElementById(`card-${teamId}`);
+function applyVotedState(id) {
+    const card = document.getElementById(`card-${id}`);
     if (!card) return;
-
-    const rating = localStorage.getItem(`voted_${teamId}`);
-    
-    // Update card styling
-    card.classList.add('voted');
-    card.style.borderColor = "var(--success)";
-    
-    // Clear selection UI
-    const statusContainer = document.getElementById(`selection-status-${teamId}`);
-    if (statusContainer) statusContainer.innerHTML = '';
-
-    // Replace actions and button with a success message
     const actions = card.querySelector('.vote-actions');
     const submitBtn = card.querySelector('.submit-vote-btn');
+    const status = card.querySelector(`#selection-status-${id}`);
     
-    if (actions) {
-        actions.innerHTML = `
-            <div class="voted-msg" style="width: 100%; background: #dcfce7; color: #166534; padding: 12px; border-radius: 8px; font-weight: 700; text-align: center;">
-                <i class="fas fa-check-circle"></i> Voted: ${rating || 'Completed'}
-            </div>
-        `;
-    }
-    
+    if (actions) actions.innerHTML = `<div style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 8px; font-weight: 700; text-align: center; width: 100%;"><i class="fas fa-check-circle"></i> Vote Recorded</div>`;
     if (submitBtn) submitBtn.remove();
+    if (status) status.remove();
 }
 
-/**
- * Updates the progress bar and stats
- */
-function updateProgress(totalTeams) {
-    const totalVoted = Object.keys(localStorage).filter(k => k.startsWith('voted_')).length;
+function updateProgress(total) {
+    const votedList = JSON.parse(localStorage.getItem('voted_list') || "[]");
     const progressText = document.getElementById('progress-text');
+    if (progressText) progressText.innerText = `${votedList.length} / ${total} Projects Voted`;
+    
     const progressBar = document.getElementById('progress-indicator');
-    const progressPercentText = document.getElementById('progress-percent-text');
-    
-    if (progressText) {
-        progressText.innerText = `${totalVoted} / ${totalTeams} projects voted`;
-    }
-    
-    if (progressBar && totalTeams > 0) {
-        const percent = (totalVoted / totalTeams) * 100;
-        progressBar.style.width = `${percent}%`;
-        if (progressPercentText) progressPercentText.innerText = `${Math.round(percent)}%`;
+    if (progressBar && total > 0) {
+        progressBar.style.width = `${(votedList.length / total) * 100}%`;
     }
 }
 
-/**
- * Recalculates progress (called after a new vote)
- */
 function updateVotingProgress() {
-    fetch(`${API_BASE_URL}/teams`)
+    fetch(`${GAS_URL}?action=getProjects`)
         .then(res => res.json())
         .then(data => {
-            if (data.status === "success") {
-                updateProgress(data.teams.length);
-            }
+            if (data.status === "success") updateProgress(data.projects.length);
         });
 }
 
-/**
- * Renders state for saved votes from localStorage
- */
-function renderSavedVotes() {
-    // This is handled by child elements on creation, but we can trigger progress update
-    updateVotingProgress();
-}
-
-/**
- * 3. Search Bar Functionality
- * Filters project cards based on the team name in the search bar.
- */
-function filterTeams() {
-    const searchInput = document.getElementById('search-projects');
-    const filter = searchInput.value.toLowerCase();
-    const projectCards = document.querySelectorAll('.project-card');
-
-    projectCards.forEach(card => {
-        const teamBadge = card.querySelector('.team-badge');
-        if (teamBadge) {
-            const teamName = teamBadge.innerText.toLowerCase();
-            if (teamName.includes(filter)) {
-                card.style.display = "";
-            } else {
-                card.style.display = "none";
-            }
-        }
-    });
-
-    // Optionally update progress display or show "no results" message
-    const visibleCards = Array.from(projectCards).filter(card => card.style.display !== "none");
-    const container = document.getElementById("projectsContainer");
-    
-    // If no results, show a message
-    let noResultsMsg = document.getElementById('no-results-msg');
-    if (visibleCards.length === 0 && filter !== "") {
-        if (!noResultsMsg) {
-            noResultsMsg = document.createElement('p');
-            noResultsMsg.id = 'no-results-msg';
-            noResultsMsg.style.cssText = "text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-muted);";
-            noResultsMsg.innerText = "No teams found matching your search.";
-            container.appendChild(noResultsMsg);
-        }
-    } else if (noResultsMsg) {
-        noResultsMsg.remove();
-    }
-}
-
-/**
- * Helper to show toast notifications (copied from main.js for self-containment)
- */
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
-    if (!container) {
-        alert(message);
-        return;
-    }
-
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    // Inline styling for immediate visibility since I can't guarantee CSS existence for new classes
     toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
     toast.style.color = '#fff';
     toast.style.padding = '12px 20px';
     toast.style.borderRadius = '8px';
     toast.style.marginBottom = '10px';
-    toast.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-    toast.style.fontWeight = '600';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.gap = '10px';
-    toast.style.animation = 'fadeInSlide 0.3s ease-out';
-    
+    toast.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
     toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
-    
     container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateY(-10px)';
-        toast.style.transition = 'all 0.5s ease';
-        setTimeout(() => toast.remove(), 500);
-    }, 3500);
+    setTimeout(() => toast.remove(), 3500);
 }
+
+// Global functions for HTML access
+window.handleVoteSubmit = handleVoteSubmit;
+window.selectRating = selectRating;
+window.filterTeams = function() {
+    const filter = document.getElementById('search-projects').value.toLowerCase();
+    document.querySelectorAll('.project-card').forEach(card => {
+        const title = card.querySelector('h3').innerText.toLowerCase();
+        const team = card.querySelector('.team-badge').innerText.toLowerCase();
+        card.style.display = (title.includes(filter) || team.includes(filter)) ? "" : "none";
+    });
+};

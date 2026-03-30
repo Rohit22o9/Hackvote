@@ -22,7 +22,7 @@
             <h2 class="gradient-text" style="font-size: 2.2rem; margin-bottom: 12px; text-align: center; font-weight: 900;">Student Portal</h2>
             <p style="text-align: center; color: var(--text-muted); margin-bottom: 35px; line-height: 1.5;">Enter your unique PRN number to start voting for hackathon projects.</p>
             
-            <form id="student-login-form">
+            <form id="student-login-form" onsubmit="loginStudent(event)">
                 <div class="form-group">
                     <label for="prn">PRN NUMBER</label>
                     <input type="text" id="prn" name="prn" placeholder="e.g. 21200123" required autocomplete="off" style="font-size: 1.1rem; padding: 15px;">

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,47 +12,69 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body class="staggered-entry">
     <!-- Sticky Navbar -->
-    <nav style="position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div class="logo gradient-text" style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.01em;">HACKVOTE</div>
+    <nav
+        style="position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="logo gradient-text" style="font-size: 1.6rem; font-weight: 900; letter-spacing: -0.01em;">HACKVOTE
+        </div>
         <div class="nav-links">
-            <a href="pages/login.html" class="btn btn-primary" style="text-decoration: none; padding: 10px 24px; font-size: 0.9rem; display: inline-block;">Enter Student Portal</a>
+            <a href="pages/login.html" class="btn btn-primary"
+                style="text-decoration: none; padding: 10px 24px; font-size: 0.9rem; display: inline-block;">Enter
+                Student Portal</a>
         </div>
     </nav>
 
     <div class="container">
         <section class="hero-section" style="padding: 100px 20px; text-align: center;">
-            <div style="background: #eef2ff; padding: 8px 18px; border-radius: 100px; display: inline-block; margin-bottom: 25px; border: 1px solid #e0e7ff; font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase;">
+            <div
+                style="background: #eef2ff; padding: 8px 18px; border-radius: 100px; display: inline-block; margin-bottom: 25px; border: 1px solid #e0e7ff; font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em; text-transform: uppercase;">
                 OFFICIAL VOTING PORTAL 2026
             </div>
-            
-            <h1 class="hero-h1 gradient-text" style="font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 25px; font-weight: 900; max-width: 1000px; margin-left: auto; margin-right: auto;">
+
+            <h1 class="hero-h1 gradient-text"
+                style="font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 1.1; margin-bottom: 25px; font-weight: 900; max-width: 1000px; margin-left: auto; margin-right: auto;">
                 Voice of the Next Generation.
             </h1>
-            
-            <p class="hero-p" style="font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 800px; margin: 0 auto 50px; line-height: 1.6;">
-                Select and support the most innovative solutions from this year's hackathon. Your vote shapes the future of technology on campus.
-            </p>
-            
-            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 500px; margin: 0 auto;">
-                <div class="card" onclick="window.location.href='pages/login.html'" style="cursor: pointer; text-align: center; padding: 50px; transition: 0.4s; width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: white; box-shadow: var(--surface-shadow);">
-                    <div style="background: #f1f5f9; width: 80px; height: 80px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; color: var(--primary); font-size: 2rem;">
-                        <i class="fas fa-vote-yea"></i>
-                    </div>
-                    
-                    <h2 style="font-size: 2.2rem; margin-bottom: 15px; font-weight: 900;">Student Portal</h2>
-                    
-                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; margin-bottom: 35px;">
-                        Secure login with your PRN to explore project entries and cast your support for this year's hackathon.
-                    </p>
-                    
-                    <button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        Enter Portal <i class="fas fa-arrow-right" style="font-size: 0.9rem;"></i>
-                    </button>
-                </div>
 
-                <a href="pages/signup.html" style="margin-top: 25px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 1rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+            <p class="hero-p"
+                style="font-size: clamp(1rem, 2vw, 1.25rem); color: var(--text-muted); max-width: 800px; margin: 0 auto 50px; line-height: 1.6;">
+                Select and support the most innovative solutions from this year's hackathon. Your vote shapes the future
+                of technology on campus.
+            </p>
+
+            <div
+                style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1000px; margin: 0 auto;">
+                
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto; width: 100%;">
+            <!-- Student Portal Card -->
+            <div class="card staggered-entry" style="text-align: center; padding: 50px 30px; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: white; box-shadow: var(--surface-shadow);">
+                <div style="width: 60px; height: 60px; background: rgba(99, 102, 241, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: var(--primary); font-size: 1.5rem;">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 15px;">Student Portal</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px; font-weight: 600;">Secure login with your PRN to explore project entries and cast your support for this year's hackathon.</p>
+                <a href="pages/login.html" class="btn btn-primary" style="width: 100%; padding: 16px; border-radius: 12px; font-weight: 800; text-decoration: none; display: inline-block;">
+                    ENTER PORTAL <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                </a>
+            </div>
+
+            <!-- Admin Portal Card -->
+            <div class="card staggered-entry" style="text-align: center; padding: 50px 30px; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: white; box-shadow: var(--surface-shadow);">
+                <div style="width: 60px; height: 60px; background: rgba(244, 63, 94, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; color: #f43f5e; font-size: 1.5rem;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 15px;">Admin Portal</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px; font-weight: 600;">Access the intelligence command center to monitor real-time voting trends and final leaderboards.</p>
+                <a href="pages/admin_login.html" class="btn btn-secondary" style="width: 100%; padding: 16px; border-radius: 12px; font-weight: 800; border: 1px solid #f43f5e; color: #f43f5e; background: white; text-decoration: none; display: inline-block;">
+                    COMMAND CENTER <i class="fas fa-terminal" style="margin-left: 8px;"></i>
+                </a>
+            </div>
+        </div>
+
+                <a href="pages/signup.html"
+                    style="margin-top: 25px; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 1rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
                     New Student? <span style="color: var(--primary);">Sign Up</span>
                 </a>
             </div>
@@ -63,4 +86,5 @@
 
     <script src="js/main.js"></script>
 </body>
+
 </html>

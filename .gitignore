@@ -1,0 +1,15 @@
+# Node dependencies
+node_modules/
+package-lock.json
+
+# Environment variables & secrets
+.env
+*.log
+
+# Old Backend (already being moved/deleted)
+backend/
+
+# IDE/System files
+.vscode/
+.DS_Store
+Thumbs.db
