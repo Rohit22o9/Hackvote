@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - HackVote</title>
+    <title>Intelligence Console - HackVote</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/global.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,121 +12,397 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        :root {
+            --sidebar-width: 280px;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        body {
+            background-color: #f8faff;
+            overflow-x: hidden;
+            font-family: 'Outfit', sans-serif;
+        }
+
         .admin-sidebar {
-            width: 280px;
+            width: var(--sidebar-width);
             height: 100vh;
             background: white;
-            padding: 40px 20px;
+            padding: 40px 24px;
             position: fixed;
-            border-right: 1px solid var(--border-color);
+            left: 0;
+            top: 0;
+            border-right: 1px solid #e2e8f0;
+            z-index: 100;
         }
-        .admin-main { margin-left: 280px; padding: 40px 5%; max-width: calc(100vw - 280px); }
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+
+        .admin-main {
+            margin-left: var(--sidebar-width);
+            padding: 40px 5%;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
             margin-bottom: 40px;
         }
-        .admin-card { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 20px; 
-            border: 1px solid var(--border-color); 
-            height: 100%;
+
+        .dashboard-header h2 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        /* Stat Grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
             overflow: hidden;
         }
-        
-        /* Table Scroll Fix */
-        .table-container {
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.1);
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            color: #6366f1;
+            padding: 12px;
+            background: #f0f4ff;
+            border-radius: 12px;
+        }
+
+        .stat-num {
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: #1e293b;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Content Rows */
+        .content-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .admin-card {
+            background: white;
+            padding: 32px;
+            border-radius: 28px;
+            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Leaderboard */
+        .leader-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: #fcfdfe;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            border: 1px solid #f1f5f9;
+            transition: 0.2s;
+        }
+
+        .leader-item:hover {
+            background: #f8faff;
+            border-color: #e2e8f0;
+        }
+
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            background: #f1f5f9;
+            color: #64748b;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            margin-right: 16px;
+            font-size: 1rem;
+        }
+
+        .rank-1 { background: #fef3c7; color: #d97706; }
+        .rank-2 { background: #f1f5f9; color: #475569; }
+        .rank-3 { background: #ffedd5; color: #9a3412; }
+
+        .leader-details h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .leader-details span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .vote-pill {
+            margin-left: auto;
+            background: #6366f1;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        /* Table Section */
+        .table-section {
+            background: white;
+            padding: 32px;
+            border-radius: 28px;
+            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .table-wrapper {
+            margin-top: 24px;
             max-height: 500px;
             overflow-y: auto;
-            margin-top: 20px;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid #f1f5f9;
         }
-        
-        .project-list-table { width: 100%; border-collapse: collapse; }
-        .project-list-table thead { position: sticky; top: 0; z-index: 10; }
-        .project-list-table th { text-align: left; padding: 15px; background: #f8fafc; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid var(--border-color); }
-        .project-list-table td { padding: 15px; border-bottom: 1px solid var(--border-color); background: white; }
-        .total-pill { background: var(--secondary); color: white; padding: 4px 10px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; }
+
+        .project-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .project-table th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            padding: 18px 24px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 5;
+        }
+
+        .project-table td {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .p-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 0.95rem;
+        }
+
+        .p-team {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .total-badge {
+            background: #ede9fe;
+            color: #7c3aed;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        .btn-refresh {
+            background: #fff;
+            color: #6366f1;
+            border: 1px solid #e0e7ff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-refresh:hover {
+            background: #f5f7ff;
+            border-color: #6366f1;
+        }
+
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.2s;
+            margin-bottom: 8px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .sidebar-btn.active {
+            background: #6366f1;
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .sidebar-btn:hover:not(.active) {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        @media (max-width: 1024px) {
+            .content-row { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
-<body style="overflow-x: hidden;">
-    <div id="toast-container"></div>
-    
-    <div class="admin-sidebar">
-        <h1 class="gradient-text" style="font-weight: 900; font-size: 1.6rem; margin-bottom: 40px;">ADMIN CONSOLE</h1>
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <a href="#" class="btn btn-primary" style="text-align: left; padding: 12px 20px;"><i class="fas fa-chart-line"></i> Intelligence</a>
-            <button onclick="logoutAdmin()" class="btn btn-secondary" style="text-align: left; padding: 12px 20px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+<body>
+    <aside class="admin-sidebar">
+        <div style="margin-bottom: 48px;">
+            <h1 class="gradient-text" style="font-size: 1.8rem; font-weight: 900;">ADMIN</h1>
         </div>
-    </div>
+        
+        <nav>
+            <button class="sidebar-btn active">
+                <i class="fas fa-chart-line"></i> Intelligence
+            </button>
+            <button class="sidebar-btn" onclick="logoutAdmin()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </nav>
+    </aside>
 
     <main class="admin-main">
-        <div style="margin-bottom: 40px;">
-            <h2 class="section-title gradient-text" style="margin-bottom: 10px;">Intelligence Dashboard</h2>
-            <p style="color: var(--text-muted);">Real-time monitoring of voting engagement across all teams.</p>
-        </div>
+        <header class="dashboard-header">
+            <h2 class="gradient-text">Intelligence Dashboard</h2>
+            <p style="color: #64748b; font-weight: 600;">System-wide voting analytics and real-time updates.</p>
+        </header>
 
-        <div class="stat-grid">
-            <div class="stat-card">
-                <i class="fas fa-layer-group"></i>
+        <section class="stat-grid">
+            <article class="stat-card">
+                <i class="fas fa-folder-tree"></i>
                 <div class="stat-num" id="stat-total-projects">0</div>
                 <div class="stat-label">Total Projects</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-check-double"></i>
+            </article>
+            <article class="stat-card">
+                <i class="fas fa-fire"></i>
                 <div class="stat-num" id="stat-total-votes">0</div>
-                <div class="stat-label">Total Votes Cast</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-award"></i>
+                <div class="stat-label">Votes Recorded</div>
+            </article>
+            <article class="stat-card">
+                <i class="fas fa-star"></i>
                 <div class="stat-num" id="stat-total-best">0</div>
-                <div class="stat-label">Best Votes</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-users"></i>
+                <div class="stat-label">"Best" Ratings</div>
+            </article>
+            <article class="stat-card">
+                <i class="fas fa-user-check"></i>
                 <div class="stat-num" id="stat-total-students">0</div>
-                <div class="stat-label">Students Voted</div>
+                <div class="stat-label">Unique Voters</div>
+            </article>
+        </section>
+
+        <div class="content-row">
+            <div class="admin-card">
+                <div class="card-title">
+                    <i class="fas fa-chart-pie" style="color: #a855f7;"></i> Voting Composition
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="votingMixChart"></canvas>
+                </div>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-title">
+                    <i class="fas fa-trophy" style="color: #fbbf24;"></i> Elite Leaderboard
+                </div>
+                <div id="top-5-list">
+                    <!-- Dynamic Items -->
+                </div>
             </div>
         </div>
 
-        <div class="dashboard-row" style="margin-bottom: 40px;">
-            <div class="admin-card">
-                <h3 style="margin-bottom: 30px;"><i class="fas fa-chart-pie" style="color: var(--secondary);"></i> Voting Mix</h3>
-                <div style="height: 250px;"><canvas id="votingMixChart"></canvas></div>
-            </div>
-            <div class="admin-card">
-                <h3 style="margin-bottom: 30px;"><i class="fas fa-trophy" style="color: #fbbf24;"></i> Elite Top 5</h3>
-                <div id="top-5-list"></div>
-            </div>
-        </div>
-
-        <div class="admin-card">
+        <section class="table-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>Project Management</h3>
-                <button class="btn btn-primary" onclick="loadAdminData()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+                <h3 class="card-title" style="margin-bottom: 0;">Project Analytics</h3>
+                <button class="btn-refresh" onclick="loadAdminData()">
+                    <i class="fas fa-sync-alt" id="refresh-icon"></i> Refresh Data
+                </button>
             </div>
-            <div class="table-container">
-                <table class="project-list-table">
+            
+            <div class="table-wrapper">
+                <table class="project-table">
                     <thead>
                         <tr>
-                            <th>Project & Team</th>
+                            <th>Team & Project</th>
                             <th>Best</th>
                             <th>Good</th>
-                            <th>Moderate</th>
-                            <th>Total</th>
+                            <th>Average</th>
+                            <th>Metric</th>
                         </tr>
                     </thead>
-                    <tbody id="project-admin-table"></tbody>
+                    <tbody id="project-admin-table">
+                        <!-- Dynamic Rows -->
+                    </tbody>
                 </table>
             </div>
-        </div>
+        </section>
     </main>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyfL-ANFGJGF7O8ZpFrDSoa_Wmj6Kyy39DzbSEv1tQvx_BCXCj61MwgWezmCFWAFLva9Q/exec";
+        let dashboardChart = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('admin_session') !== 'active') {
@@ -134,82 +410,79 @@
                 return;
             }
             loadAdminData();
-            // Longer interval to prevent lag
             setInterval(loadAdminData, 60000);
         });
 
         async function loadAdminData() {
+            const icon = document.getElementById('refresh-icon');
+            if(icon) icon.classList.add('fa-spin');
+
             try {
                 const response = await fetch(`${GAS_URL}?action=adminStats&t=${Date.now()}`);
                 const data = await response.json();
                 if (data.status === "success") {
-                    updateStats(data);
-                    renderLeaderboard(data.projects);
-                    renderMixedChart(data.mix);
-                    renderProjectTable(data.projects);
+                    updateUI(data);
                 }
-            } catch (err) { console.error("Update Error:", err); }
+            } catch (err) {
+                console.error("Dashboard Sync Error:", err);
+            } finally {
+                if(icon) icon.classList.remove('fa-spin');
+            }
         }
 
-        function updateStats(data) {
+        function updateUI(data) {
             document.getElementById('stat-total-projects').innerText = data.totalProjects || 0;
             document.getElementById('stat-total-votes').innerText = data.totalVotes || 0;
             document.getElementById('stat-total-best').innerText = data.mix ? data.mix.best : 0;
             document.getElementById('stat-total-students').innerText = data.totalStudents || 0;
-        }
 
-        function renderLeaderboard(projects) {
-            const list = document.getElementById('top-5-list');
-            const top5 = [...projects].sort((a, b) => b.totalVotes - a.totalVotes).slice(0, 5);
-            list.innerHTML = top5.map((p, i) => {
-                const rankClass = i < 3 ? `rank-${i+1}` : '';
-                return `
-                    <div class="leader-item">
-                        <div class="rank ${rankClass}">#${i+1}</div>
-                        <div class="leader-info">
-                            <h4>${p.title}</h4>
-                            <span>${p.teamName}</span>
-                        </div>
-                        <div class="best-count">${p.totalVotes} Votes</div>
+            const leaderboard = document.getElementById('top-5-list');
+            const top5 = [...data.projects].sort((a, b) => b.totalVotes - a.totalVotes).slice(0, 5);
+            leaderboard.innerHTML = top5.map((p, i) => `
+                <div class="leader-item">
+                    <div class="rank-badge rank-${i+1}">#${i+1}</div>
+                    <div class="leader-details">
+                        <h4>${p.title}</h4>
+                        <span>${p.teamName}</span>
                     </div>
-                `;
-            }).join('');
-        }
+                    <div class="vote-pill">${p.totalVotes} ✨</div>
+                </div>
+            `).join('');
 
-        function renderMixedChart(mix) {
             const ctx = document.getElementById('votingMixChart').getContext('2d');
-            if (window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
+            if (dashboardChart) dashboardChart.destroy();
+            dashboardChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Best', 'Good', 'Moderate'],
+                    labels: ['Best', 'Good', 'Average'],
                     datasets: [{
-                        data: [mix.best, mix.good, mix.moderate],
+                        data: [data.mix.best, data.mix.good, data.mix.moderate],
                         backgroundColor: ['#6366f1', '#10b981', '#f59e0b'],
-                        borderWidth: 0
+                        borderWidth: 0,
+                        hoverOffset: 15
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } },
-                    cutout: '70%'
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { font: { family: "'Outfit'", weight: '600' } } } 
+                    },
+                    cutout: '75%'
                 }
             });
-        }
 
-        function renderProjectTable(projects) {
-            const table = document.getElementById('project-admin-table');
-            table.innerHTML = projects.map(p => `
+            const tableBody = document.getElementById('project-admin-table');
+            tableBody.innerHTML = data.projects.map(p => `
                 <tr>
                     <td>
-                        <div style="font-weight: 800;">${p.title}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">${p.teamName}</div>
+                        <div class="p-title">${p.title}</div>
+                        <div class="p-team">${p.teamName}</div>
                     </td>
-                    <td>${p.bestCount}</td>
-                    <td>${p.goodCount}</td>
-                    <td>${p.moderateCount}</td>
-                    <td><span class="total-pill">${p.totalVotes} Total</span></td>
+                    <td><b style="color: #6366f1">${p.bestCount}</b></td>
+                    <td><b style="color: #10b981">${p.goodCount}</b></td>
+                    <td><b style="color: #f59e0b">${p.moderateCount}</b></td>
+                    <td><span class="total-badge">${p.totalVotes} Total</span></td>
                 </tr>
             `).join('');
         }
@@ -218,9 +491,6 @@
             localStorage.removeItem('admin_session');
             window.location.href = '../index.html';
         }
-    </script>
-</body>
-</html>
     </script>
 </body>
 </html>
