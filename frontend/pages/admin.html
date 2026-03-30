@@ -133,8 +133,115 @@
         </div>
     </main>
 
-    <script src="../js/admin.js"></script>
     <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyfL-ANFGJGF7O8ZpFrDSoa_Wmj6Kyy39DzbSEv1tQvx_BCXCj61MwgWezmCFWAFLva9Q/exec";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check session
+            if (localStorage.getItem('admin_session') !== 'active') {
+                window.location.href = 'admin_login.html';
+                return;
+            }
+            loadAdminData();
+            // Refresh every 30 seconds
+            setInterval(loadAdminData, 30000);
+        });
+
+        async function loadAdminData() {
+            try {
+                console.log("Connecting to Intelligence Hub:", GAS_URL);
+                const cacheBuster = `&t=${new Date().getTime()}`;
+                const response = await fetch(`${GAS_URL}?action=adminStats${cacheBuster}`);
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                
+                const data = await response.json();
+                console.log("Data Received:", data);
+                
+                if (data.status === "success") {
+                    updateStats(data);
+                    renderLeaderboard(data.projects);
+                    renderMixedChart(data.mix);
+                    renderProjectTable(data.projects);
+                } else {
+                    alert("GAS ERROR: " + data.message);
+                }
+            } catch (err) {
+                console.error("Dashboard Error:", err);
+                alert("DIAGNOSTIC: Failed to connect to Google. \nError: " + err.message);
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('stat-total-projects').innerText = data.totalProjects || 0;
+            document.getElementById('stat-total-votes').innerText = data.totalVotes || 0;
+            document.getElementById('stat-total-best').innerText = data.mix ? data.mix.best : 0;
+            document.getElementById('stat-total-students').innerText = data.totalStudents || 0;
+        }
+
+        function renderLeaderboard(projects) {
+            const list = document.getElementById('top-5-list');
+            list.innerHTML = '';
+            
+            const top5 = [...projects].sort((a, b) => b.totalVotes - a.totalVotes).slice(0, 5);
+            
+            top5.forEach((p, i) => {
+                list.innerHTML += `
+                    <div class="leader-item">
+                        <div class="rank">#${i+1}</div>
+                        <div class="leader-info">
+                            <h4>${p.title}</h4>
+                            <span>${p.teamName}</span>
+                        </div>
+                        <div class="best-count">${p.totalVotes} Votes</div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderMixedChart(mix) {
+            const ctx = document.getElementById('votingMixChart').getContext('2d');
+            
+            if (window.myChart) window.myChart.destroy();
+            
+            window.myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Best', 'Good', 'Moderate'],
+                    datasets: [{
+                        data: [mix.best, mix.good, mix.moderate],
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function renderProjectTable(projects) {
+            const table = document.getElementById('project-admin-table');
+            table.innerHTML = '';
+            
+            projects.forEach(p => {
+                table.innerHTML += `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 800;">${p.title}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">${p.teamName}</div>
+                        </td>
+                        <td style="font-weight: 700;">${p.bestCount}</td>
+                        <td style="font-weight: 700;">${p.goodCount}</td>
+                        <td style="font-weight: 700;">${p.moderateCount}</td>
+                        <td><span class="total-pill">${p.totalVotes} Total</span></td>
+                    </tr>
+                `;
+            });
+        }
+
         function logoutAdmin() {
             localStorage.removeItem('admin_session');
             window.location.href = '../index.html';
