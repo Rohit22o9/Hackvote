@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,11 +21,13 @@
             align-items: center;
             padding: 40px 20px;
         }
+
         .signup-card {
             width: 100%;
             max-width: 420px;
             margin-top: 20px;
         }
+
         .form-group select {
             width: 100%;
             padding: 12px 16px;
@@ -41,11 +44,13 @@
             background-size: 16px;
             cursor: pointer;
         }
+
         .form-group select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
+
         .error-message {
             color: var(--danger);
             font-size: 0.75rem;
@@ -53,6 +58,7 @@
             font-weight: 600;
             display: none;
         }
+
         .btn-primary {
             display: flex;
             align-items: center;
@@ -65,19 +71,26 @@
         }
     </style>
 </head>
+
 <body class="staggered-entry">
     <div id="toast-container"></div>
 
     <div class="container signup-container">
-        <a href="../index.html" style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+        <a href="../index.html"
+            style="color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.9rem;">
             <i class="fas fa-arrow-left"></i> Back to Home
         </a>
-        
+
         <div class="auth-container card signup-card">
-            <h2 class="gradient-text" style="font-size: 2.2rem; margin-bottom: 8px; text-align: center; font-weight: 900;">Student Signup</h2>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 30px; line-height: 1.5; font-size: 0.95rem;">Create your account to participate in voting</p>
-            
-            <div id="general-error" class="error-message" style="text-align: center; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;"></div>
+            <h2 class="gradient-text"
+                style="font-size: 2.2rem; margin-bottom: 8px; text-align: center; font-weight: 900;">Student Signup</h2>
+            <p
+                style="text-align: center; color: var(--text-muted); margin-bottom: 30px; line-height: 1.5; font-size: 0.95rem;">
+                Create your account to participate in voting</p>
+
+            <div id="general-error" class="error-message"
+                style="text-align: center; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+            </div>
 
             <form id="signup-form" novalidate onsubmit="signupStudent(event)">
                 <div class="form-group">
@@ -87,16 +100,19 @@
                 </div>
 
                 <div class="form-group" id="email-section">
-                    <label for="email">College Email ID</label>
-                    <input type="email" id="email" name="email" placeholder="e.g. rohit@college.edu">
-                    <button type="button" id="send-otp-btn" class="btn btn-primary" onclick="sendOtp()" style="margin-top: 10px; width: 100%; padding: 10px; font-size: 0.9rem; background: var(--secondary);">
+                    <label for="email">Email ID</label>
+                    <input type="email" id="email" name="email" placeholder="e.g. abc@gmail.com">
+                    <button type="button" id="send-otp-btn" class="btn btn-primary" onclick="sendOtp()"
+                        style="margin-top: 10px; width: 100%; padding: 10px; font-size: 0.9rem; background: var(--secondary);">
                         <i class="fas fa-paper-plane"></i> Send OTP
                     </button>
                 </div>
 
-                <div class="form-group" id="otp-section" style="background: rgba(99, 102, 241, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed var(--primary); margin-bottom: 20px;">
+                <div class="form-group" id="otp-section"
+                    style="background: rgba(99, 102, 241, 0.05); padding: 15px; border-radius: 12px; border: 1px dashed var(--primary); margin-bottom: 20px;">
                     <label for="otp-input">Verification Code (OTP)</label>
-                    <input type="text" id="otp-input" name="otp" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; letter-spacing: 5px; font-size: 1.2rem; font-weight: 900;">
+                    <input type="text" id="otp-input" name="otp" placeholder="Enter 6-digit code" maxlength="6"
+                        style="text-align: center; letter-spacing: 5px; font-size: 1.2rem; font-weight: 900;">
                 </div>
 
                 <div class="form-group">
@@ -123,20 +139,22 @@
                         <option value="Fourth Year">Fourth Year</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="prn">Set PRN Password</label>
                     <input type="password" id="prn" name="prn" placeholder="Enter your PRN number">
                 </div>
-                
+
                 <button type="submit" id="signup-submit-btn" class="btn btn-primary" disabled>
                     Complete Registration
                 </button>
             </form>
-            
-            <div style="margin-top: 30px; text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color);">
+
+            <div
+                style="margin-top: 30px; text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color);">
                 <p style="font-size: 0.95rem; color: var(--text-muted);">
-                    Already have an account? <a href="login.html" style="color: var(--primary); text-decoration: none; font-weight: 700;">Login</a>
+                    Already have an account? <a href="login.html"
+                        style="color: var(--primary); text-decoration: none; font-weight: 700;">Login</a>
                 </p>
             </div>
         </div>
@@ -146,4 +164,5 @@
     <script src="../js/main.js"></script>
     <script src="../js/auth.js"></script>
 </body>
+
 </html>
